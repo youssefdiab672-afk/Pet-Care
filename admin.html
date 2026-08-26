@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة تحكم PetCare</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#eef3f9;color:#172033}
+header{background:#173b6c;color:#fff;padding:18px 7%;display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:22px;font-weight:bold}
+header a{color:#fff;text-decoration:none;font-size:14px;margin-left:15px}
+button{cursor:pointer;border:0;border-radius:9px;padding:10px 16px;font-size:14px}
+.btn{background:#1769e0;color:#fff}
+.btn.danger{background:#d9534f;color:#fff}
+.btn.secondary{background:#e5ecf5;color:#173b6c}
+main{padding:35px 7%;max-width:1100px;margin:auto}
+.login-box{max-width:380px;margin:80px auto;background:#fff;padding:35px;border-radius:16px;box-shadow:0 8px 25px rgba(20,40,80,.1);text-align:center}
+.login-box h2{margin-bottom:20px}
+input,select,textarea{width:100%;padding:11px;margin:8px 0;border:1px solid #ccd5e2;border-radius:8px;font-size:14px;font-family:inherit}
+.panel{background:#fff;border-radius:16px;padding:24px;box-shadow:0 8px 25px rgba(20,40,80,.06);margin-bottom:24px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.stat{background:#fff;border-radius:14px;padding:18px;text-align:center;box-shadow:0 8px 25px rgba(20,40,80,.06)}
+.stat strong{display:block;font-size:24px}
+table{width:100%;border-collapse:collapse}
+th,td{padding:10px;border-bottom:1px solid #eee;text-align:right;font-size:14px}
+.error{color:#b3261e;font-size:13px;min-height:18px;margin-top:4px}
+.notice{display:none;margin-top:12px;padding:10px;border-radius:8px;background:#e7f7ed;color:#176b3a;font-size:14px}
+.notice.error{background:#fdecea;color:#b3261e}
+.inline-form{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+.inline-form>div{flex:1;min-width:120px}
+.row-actions{display:flex;gap:6px}
+.hidden{display:none}
+select{cursor:pointer}
+.tag{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;background:#eef3f9}
+</style>
+</head>
+<body>
+
+<div id="loginView" class="login-box">
+    <h2>تسجيل دخول المسؤول 🔒</h2>
+    <form id="loginForm">
+        <input id="password" type="password" placeholder="كلمة المرور" required>
+        <button class="btn" style="width:100%">دخول</button>
+        <div class="error" id="loginError"></div>
+    </form>
+    <a href="/" style="display:block;margin-top:15px;color:#1769e0;font-size:14px">العودة للمتجر</a>
+</div>
+
+<div id="dashView" class="hidden">
+<header>
+    <div class="logo">لوحة تحكم PetCare 🐾</div>
+    <div>
+        <a href="/">المتجر</a>
+        <button class="btn danger" onclick="logout()">تسجيل الخروج</button>
+    </div>
+</header>
+
+<main>
+    <div class="stats">
+        <div class="stat"><strong id="statUsers">0</strong>عملاء</div>
+        <div class="stat"><strong id="statProducts">0</strong>منتجات</div>
+        <div class="stat"><strong id="statOrders">0</strong>طلبات</div>
+        <div class="stat"><strong id="statRevenue">$0</strong>إيرادات</div>
+    </div>
+
+    <div class="panel">
+        <h3 style="margin-bottom:15px">إضافة منتج جديد</h3>
+        <form id="addForm" class="inline-form">
+            <div><input id="pname" placeholder="اسم المنتج" required></div>
+            <div><input id="pemoji" placeholder="إيموجي" maxlength="4" value="🐾"></div>
+            <div><input id="pprice" type="number" min="0.01" step="0.01" placeholder="السعر" required></div>
+            <div><input id="pstock" type="number" min="0" step="1" placeholder="المخزون" required></div>
+            <div><button class="btn" style="width:100%">إضافة</button></div>
+        </form>
+        <div class="notice" id="addNotice"></div>
+    </div>
+
+    <div class="panel">
+        <h3 style="margin-bottom:15px">المنتجات</h3>
+        <table id="productsTable">
+            <thead><tr><th>المنتج</th><th>السعر</th><th>المخزون</th><th>إجراءات</th></tr></thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <div class="panel">
+        <h3 style="margin-bottom:15px">آخر الطلبات</h3>
+        <table id="ordersTable">
+            <thead><tr><th>الطلب</th><th>العميل</th><th>الإجمالي</th><th>الحالة</th></tr></thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <div class="panel">
+        <h3 style="margin-bottom:15px">رسائل التواصل</h3>
+        <div id="messagesList">لا توجد رسائل بعد.</div>
+    </div>
+</main>
+</div>
+
+<script>
+let token = null;
+let orderStatuses = [];
+
+function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+function showView() {
+    document.getElementById("loginView").classList.toggle("hidden", !!token);
+    document.getElementById("dashView").classList.toggle("hidden", !token);
+}
+
+document.getElementById("loginForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    const password = document.getElementById("password").value;
+    const errEl = document.getElementById("loginError");
+    errEl.textContent = "";
+    try {
+        const res = await fetch("/api/admin/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ password })
+        });
+        const data = await res.json();
+        if (!res.ok) { errEl.textContent = data.error || "فشل تسجيل الدخول"; return; }
+        token = data.token;
+        sessionStorage.setItem("petcare_admin_token", token);
+        showView();
+        loadDashboard();
+    } catch {
+        errEl.textContent = "تعذر الاتصال بالخادم";
+    }
+});
+
+function logout() {
+    if (token) fetch("/api/admin/logout", { method: "POST", headers: { "x-admin-token": token } }).catch(() => {});
+    token = null;
+    sessionStorage.removeItem("petcare_admin_token");
+    showView();
+}
+
+async function authFetch(url, options = {}) {
+    options.headers = Object.assign({}, options.headers, { "x-admin-token": token });
+    const res = await fetch(url, options);
+    if (res.status === 401) { logout(); throw new Error("انتهت الجلسة"); }
+    return res;
+}
+
+function notify(elId, text, isError) {
+    const el = document.getElementById(elId);
+    el.textContent = text;
+    el.className = "notice" + (isError ? " error" : "");
+    el.style.display = "block";
+    setTimeout(() => el.style.display = "none", 3500);
+}
+
+async function loadDashboard() {
+    try {
+        const res = await authFetch("/api/admin");
+        const d = await res.json();
+        orderStatuses = d.orderStatuses;
+        document.getElementById("statUsers").textContent = d.users;
+        document.getElementById("statProducts").textContent = d.products;
+        document.getElementById("statOrders").textContent = d.orders;
+        document.getElementById("statRevenue").textContent = "$" + d.revenue;
+
+        document.querySelector("#productsTable tbody").innerHTML = d.allProducts.map(p => `
+            <tr>
+                <td>${escapeHtml(p.emoji)} ${escapeHtml(p.name)}</td>
+                <td>$${p.price}</td>
+                <td>${p.stock}</td>
+                <td class="row-actions">
+                    <button class="btn secondary" onclick="editProduct(${p.id})">تعديل</button>
+                    <button class="btn danger" onclick="deleteProduct(${p.id})">حذف</button>
+                </td>
+            </tr>`).join("") || "<tr><td colspan='4'>لا توجد منتجات.</td></tr>";
+
+        document.querySelector("#ordersTable tbody").innerHTML = d.recentOrders.map(o => `
+            <tr>
+                <td>#${o.id}</td>
+                <td>${escapeHtml(o.customer.name)}</td>
+                <td>$${o.total}</td>
+                <td>
+                    <select onchange="updateOrderStatus(${o.id}, this.value)">
+                        ${orderStatuses.map(s => `<option value="${escapeHtml(s)}" ${s === o.status ? "selected" : ""}>${escapeHtml(s)}</option>`).join("")}
+                    </select>
+                </td>
+            </tr>`).join("") || "<tr><td colspan='4'>لا توجد طلبات بعد.</td></tr>";
+
+        document.getElementById("messagesList").innerHTML = d.messages.length
+            ? d.messages.map(m => `<div style="padding:10px 0;border-bottom:1px solid #eee">
+                <strong>${escapeHtml(m.name)}</strong> <span class="tag">${escapeHtml(m.email)}</span>
+                <p style="margin-top:4px;color:#536174">${escapeHtml(m.text)}</p>
+               </div>`).join("")
+            : "لا توجد رسائل بعد.";
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+document.getElementById("addForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    try {
+        const res = await authFetch("/api/products", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                name: document.getElementById("pname").value,
+                emoji: document.getElementById("pemoji").value || "🐾",
+                price: document.getElementById("pprice").value,
+                stock: document.getElementById("pstock").value
+            })
+        });
+        const data = await res.json();
+        if (!res.ok) return notify("addNotice", data.error || "خطأ", true);
+        e.target.reset();
+        document.getElementById("pemoji").value = "🐾";
+        notify("addNotice", "تمت إضافة المنتج بنجاح ✅");
+        loadDashboard();
+    } catch {
+        notify("addNotice", "تعذر الاتصال بالخادم", true);
+    }
+});
+
+async function editProduct(id) {
+    const price = prompt("السعر الجديد (اتركه فارغًا لعدم التغيير):");
+    const stock = prompt("المخزون الجديد (اتركه فارغًا لعدم التغيير):");
+    const body = {};
+    if (price !== null && price.trim() !== "") body.price = price;
+    if (stock !== null && stock.trim() !== "") body.stock = stock;
+    if (!Object.keys(body).length) return;
+    try {
+        const res = await authFetch(`/api/products/${id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        if (!res.ok) return alert(data.error || "خطأ");
+        loadDashboard();
+    } catch {
+        alert("تعذر الاتصال بالخادم");
+    }
+}
+
+async function deleteProduct(id) {
+    if (!confirm("هل تريد حذف هذا المنتج نهائيًا؟")) return;
+    try {
+        const res = await authFetch(`/api/products/${id}`, { method: "DELETE" });
+        const data = await res.json();
+        if (!res.ok) return alert(data.error || "خطأ");
+        loadDashboard();
+    } catch {
+        alert("تعذر الاتصال بالخادم");
+    }
+}
+
+async function updateOrderStatus(id, status) {
+    try {
+        const res = await authFetch(`/api/orders/${id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status })
+        });
+        const data = await res.json();
+        if (!res.ok) alert(data.error || "خطأ");
+    } catch {
+        alert("تعذر الاتصال بالخادم");
+    }
+}
+
+// Restore session if a token already exists in this tab
+token = sessionStorage.getItem("petcare_admin_token");
+showView();
+if (token) loadDashboard();
+</script>
+</body>
+</html>

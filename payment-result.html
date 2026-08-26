@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>نتيجة الدفع | PetCare</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#f6f8fb;color:#172033;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.card{background:#fff;border-radius:20px;padding:40px 30px;max-width:420px;width:100%;text-align:center;box-shadow:0 15px 40px rgba(20,40,80,.12)}
+.icon{font-size:60px;margin-bottom:15px}
+h1{font-size:22px;margin-bottom:10px}
+p{color:#667085;margin-bottom:25px;line-height:1.7}
+a.btn{display:inline-block;background:#1769e0;color:#fff;text-decoration:none;padding:13px 28px;border-radius:10px;font-size:15px}
+.success .icon{color:#176b3a}
+.fail .icon{color:#d9534f}
+</style>
+</head>
+<body>
+<div class="card" id="resultCard">
+    <div class="icon">⏳</div>
+    <h1>جاري التحقق من نتيجة الدفع...</h1>
+    <p>لحظات من فضلك.</p>
+</div>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+// Paymob appends a "success" query param (and others) to this redirect URL.
+const success = params.get("success");
+const card = document.getElementById("resultCard");
+
+if (success === "true") {
+    card.className = "success";
+    card.innerHTML = `
+        <div class="icon">✅</div>
+        <h1>تم الدفع بنجاح!</h1>
+        <p>شكرًا لطلبك من PetCare. سيتم تجهيز طلبك وتحديث حالته قريبًا.</p>
+        <a class="btn" href="/">العودة للمتجر</a>`;
+} else if (success === "false") {
+    card.className = "fail";
+    card.innerHTML = `
+        <div class="icon">❌</div>
+        <h1>لم تكتمل عملية الدفع</h1>
+        <p>حدث خطأ أثناء الدفع أو تم إلغاؤه. لم يتم خصم أي مبلغ. يمكنك المحاولة مرة أخرى.</p>
+        <a class="btn" href="/">العودة للمتجر</a>`;
+} else {
+    card.className = "fail";
+    card.innerHTML = `
+        <div class="icon">ℹ️</div>
+        <h1>لا توجد نتيجة دفع لعرضها</h1>
+        <p>يبدو أنك وصلت لهذه الصفحة مباشرة. إذا كنت بانتظار نتيجة طلب، تحقق من بريدك الإلكتروني أو تواصل معنا.</p>
+        <a class="btn" href="/">العودة للمتجر</a>`;
+}
+</script>
+</body>
+</html>
