@@ -1,344 +1,40 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PetCare | كل ما يحتاجه حيوانك الأليف</title>
-<style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: Arial, sans-serif; background: #f6f8fb; color: #172033; line-height: 1.7; }
-header { background: #173b6c; color: white; padding: 18px 7%; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; }
-.logo { font-size: 26px; font-weight: bold; }
-nav a { color: white; text-decoration: none; margin-right: 22px; cursor: pointer; font-size: 15px; }
-.cart-btn { position: relative; background: transparent; border: 1px solid rgba(255,255,255,.4); color: #fff; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 15px; }
-.cart-badge { position: absolute; top: -8px; left: -8px; background: #d9534f; color: #fff; font-size: 12px; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; }
-.hero { padding: 75px 7%; background: linear-gradient(135deg, #eaf3ff, #ffffff); display: grid; grid-template-columns: 1.2fr 1fr; gap: 40px; align-items: center; }
-.hero h1 { font-size: 46px; margin-bottom: 15px; }
-.hero p { font-size: 19px; color: #536174; margin-bottom: 25px; }
-.btn { border: 0; background: #1769e0; color: white; padding: 13px 25px; border-radius: 10px; font-size: 16px; cursor: pointer; transition: .2s; }
-.btn:hover { transform: translateY(-2px); background: #0d56c0; }
-.btn:disabled { background: #aab5c4; cursor: not-allowed; transform: none; }
-.btn.secondary { background: #eef3f9; color: #173b6c; }
-.btn.danger { background: #d9534f; }
-.hero-card { background: white; border-radius: 24px; padding: 45px; text-align: center; box-shadow: 0 15px 40px rgba(20,40,80,.12); font-size: 90px; }
-section { padding: 65px 7%; }
-.title { text-align: center; margin-bottom: 35px; }
-.title h2 { font-size: 32px; }
-.title p { color: #667085; margin-top: 8px; }
-.products { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
-.product { background: white; padding: 25px; border-radius: 18px; box-shadow: 0 8px 25px rgba(20,40,80,.08); transition: .2s; text-align: center; }
-.product:hover { transform: translateY(-5px); }
-.product .emoji { font-size: 55px; }
-.product h3 { margin: 10px 0; }
-.price { color: #1769e0; font-size: 21px; font-weight: bold; margin: 10px 0; }
-.stock { color: #667085; font-size: 14px; margin-bottom: 12px; }
-.stock.low { color: #d9534f; }
-.features { background: #173b6c; color: white; display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; }
-.feature { text-align: center; padding: 15px; }
-.feature div { font-size: 40px; }
-.contact { max-width: 650px; margin: auto; background: white; padding: 30px; border-radius: 18px; box-shadow: 0 8px 25px rgba(20,40,80,.08); }
-input, textarea { width: 100%; padding: 13px; margin: 8px 0 15px; border: 1px solid #ccd5e2; border-radius: 9px; font-size: 15px; font-family: inherit; }
-textarea { min-height: 110px; resize: vertical; }
-footer { text-align: center; padding: 25px; background: #102d52; color: white; }
-.notice { display: none; margin-top: 15px; padding: 12px; background: #e7f7ed; color: #176b3a; border-radius: 9px; text-align: center; }
-.notice.error { background: #fdecea; color: #b3261e; }
-/* Cart drawer */
-.overlay { display: none; position: fixed; inset: 0; background: rgba(10,20,40,.45); z-index: 20; }
-.overlay.open { display: block; }
-.drawer { position: fixed; top: 0; left: 0; height: 100%; width: min(400px, 92vw); background: #fff; z-index: 21; transform: translateX(-105%); transition: transform .25s; display: flex; flex-direction: column; box-shadow: 4px 0 25px rgba(0,0,0,.15); }
-.drawer.open { transform: translateX(0); }
-.drawer-head { padding: 20px; background: #173b6c; color: #fff; display: flex; justify-content: space-between; align-items: center; }
-.drawer-head button { background: transparent; border: 0; color: #fff; font-size: 22px; cursor: pointer; }
-.drawer-body { flex: 1; overflow-y: auto; padding: 15px 20px; }
-.cart-item { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1px solid #eee; }
-.cart-item .info { flex: 1; }
-.qty-controls { display: flex; align-items: center; gap: 8px; }
-.qty-controls button { width: 28px; height: 28px; border-radius: 6px; border: 1px solid #ccd5e2; background: #f6f8fb; cursor: pointer; font-size: 16px; }
-.remove-btn { background: transparent; border: 0; color: #d9534f; cursor: pointer; font-size: 13px; }
-.drawer-foot { padding: 18px 20px; border-top: 1px solid #eee; }
-.drawer-foot .total { display: flex; justify-content: space-between; font-weight: bold; font-size: 18px; margin-bottom: 14px; }
-/* Checkout modal */
-.modal-bg { display: none; position: fixed; inset: 0; background: rgba(10,20,40,.5); z-index: 30; align-items: center; justify-content: center; }
-.modal-bg.open { display: flex; }
-.modal { background: #fff; border-radius: 18px; padding: 28px; width: min(420px, 92vw); max-height: 90vh; overflow-y: auto; }
-.modal h3 { margin-bottom: 15px; }
-.modal-close { float: left; background: transparent; border: 0; font-size: 20px; cursor: pointer; }
-@media (max-width: 800px) {
-  .hero { grid-template-columns: 1fr; text-align: center; }
-  .hero h1 { font-size: 35px; }
-  .products, .features { grid-template-columns: 1fr; }
-  nav a { margin-right: 10px; font-size: 13px; }
-}
-</style>
-</head>
-<body>
+<!doctype html><html lang="en" dir="ltr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b1220"><title>PetCare — Global Pet Marketplace</title><style>
+:root{--bg:#f5f7fb;--card:#fff;--ink:#0b1220;--muted:#64748b;--brand:#2563eb;--brand2:#7c3aed;--line:#e2e8f0;--dark:#0b1220;--ok:#15803d;--danger:#dc2626}*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}button,input,textarea,select{font:inherit}button{cursor:pointer}.nav{position:sticky;top:0;z-index:50;background:rgba(11,18,32,.92);backdrop-filter:blur(16px);color:#fff;border-bottom:1px solid rgba(255,255,255,.08)}.navin{max-width:1200px;margin:auto;padding:16px 22px;display:flex;align-items:center;gap:24px}.logo{font-size:22px;font-weight:900;letter-spacing:-.5px}.logo span{color:#60a5fa}.links{display:flex;gap:20px;flex:1}.links a{color:#cbd5e1;text-decoration:none;font-size:14px}.actions{display:flex;gap:8px;align-items:center}.btn{border:0;border-radius:12px;padding:11px 16px;background:var(--brand);color:#fff;font-weight:750;transition:.2s}.btn:hover{transform:translateY(-1px);filter:brightness(1.06)}.btn.ghost{background:transparent;border:1px solid #334155;color:#fff}.btn.light{background:#eaf0ff;color:#1d4ed8}.btn.danger{background:var(--danger)}.lang{background:#111827;color:#fff;border:1px solid #334155;border-radius:10px;padding:9px}.hero{max-width:1200px;margin:0 auto;padding:82px 22px 60px;display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center}.eyebrow{display:inline-flex;padding:7px 11px;border-radius:99px;background:#e9efff;color:#3156c8;font-size:12px;font-weight:800}.hero h1{font-size:clamp(42px,6vw,76px);line-height:1.02;letter-spacing:-3px;margin:18px 0}.hero p{font-size:19px;color:var(--muted);max-width:650px}.heroBtns{display:flex;gap:12px;margin-top:26px;flex-wrap:wrap}.heroArt{min-height:420px;border-radius:36px;background:radial-gradient(circle at 30% 25%,#dbeafe,transparent 34%),radial-gradient(circle at 75% 70%,#ede9fe,transparent 35%),#0f172a;display:grid;place-items:center;box-shadow:0 30px 70px rgba(15,23,42,.2);font-size:120px}.section{max-width:1200px;margin:auto;padding:55px 22px}.sectionHead{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:24px}.section h2{font-size:34px;margin:0;letter-spacing:-1px}.muted{color:var(--muted)}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}.product{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:22px;box-shadow:0 12px 30px rgba(15,23,42,.05)}.productIcon{height:190px;border-radius:18px;background:linear-gradient(135deg,#eff6ff,#f5f3ff);display:grid;place-items:center;font-size:80px}.product h3{margin:17px 0 4px}.vendor{font-size:12px;color:#64748b}.price{font-size:22px;font-weight:900;color:#1d4ed8;margin:10px 0}.stock{font-size:13px;color:var(--muted);margin-bottom:14px}.features{background:#0b1220;color:#fff}.featureGrid{max-width:1200px;margin:auto;padding:55px 22px;display:grid;grid-template-columns:repeat(3,1fr);gap:20px}.feature{padding:24px;border:1px solid #263244;border-radius:20px;background:#111827}.feature b{font-size:28px}.account{background:#eef4ff;border:1px solid #dbeafe;border-radius:20px;padding:20px;margin-top:20px}.orders{display:grid;gap:12px}.order{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px}.pill{display:inline-block;border-radius:99px;padding:4px 9px;background:#eef2ff;color:#3730a3;font-size:12px;font-weight:800}.footer{padding:30px 22px;text-align:center;color:#94a3b8;background:#020617}.modalBg{display:none;position:fixed;inset:0;background:rgba(2,6,23,.65);z-index:100;align-items:center;justify-content:center;padding:18px}.modalBg.open{display:flex}.modal{background:#fff;border-radius:24px;width:min(480px,100%);max-height:90vh;overflow:auto;padding:28px;position:relative}.close{position:absolute;right:18px;top:15px;border:0;background:none;font-size:24px}.tabs{display:flex;gap:6px;background:#f1f5f9;padding:5px;border-radius:12px;margin:15px 0}.tabs button{flex:1;border:0;background:transparent;padding:9px;border-radius:9px}.tabs .active{background:#fff;box-shadow:0 2px 8px #cbd5e1}.field{margin:11px 0}.field label{display:block;font-size:13px;font-weight:700;margin-bottom:5px}.field input,.field textarea{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:11px;outline:none}.field input:focus,.field textarea:focus{border-color:#2563eb;box-shadow:0 0 0 3px #dbeafe}.notice{padding:11px;border-radius:10px;margin-top:10px;background:#eff6ff;color:#1d4ed8;display:none}.notice.show{display:block}.notice.err{background:#fef2f2;color:#b91c1c}.cashBox{background:#ecfdf5;border:1px solid #bbf7d0;border-radius:16px;padding:16px;margin:14px 0}.cashNumber{font-size:25px;font-weight:900;letter-spacing:1px}.noticePanel{position:fixed;right:18px;top:72px;width:min(390px,calc(100vw - 36px));background:#fff;border:1px solid #dbe3ef;border-radius:16px;padding:16px;box-shadow:0 20px 50px rgba(15,23,42,.2);z-index:150}.noticePanel.hidden{display:none}.notificationItem{padding:12px;border-bottom:1px solid #eef2f7;cursor:pointer}.notificationItem:last-child{border-bottom:0}.notificationItem.unread{background:#eff6ff}.hidden{display:none!important}@media(max-width:850px){.hero{grid-template-columns:1fr;padding-top:55px}.heroArt{min-height:270px}.grid,.featureGrid{grid-template-columns:1fr}.links{display:none}.sectionHead{align-items:start;flex-direction:column}.actions .lang{display:none}}
+</style></head><body>
+<header class="nav"><div class="navin"><div class="logo">Pet<span>Care</span> 🐾</div><nav class="links"><a href="#products" data-i18n="products">Products</a><a href="#about" data-i18n="about">About</a><a href="#contact" data-i18n="contact">Contact</a></nav><div class="actions"><select id="lang" class="lang"><option value="en">EN</option><option value="ar">العربية</option></select><button id="loginBtn" class="btn ghost" onclick="openAuth()" data-i18n="login">Sign in</button><button id="accountBtn" class="btn light hidden" onclick="openAccount()">Account</button><button id="logoutBtn" class="btn danger hidden" onclick="logout()">Logout</button><button id="notifyBtn" class="btn light hidden" onclick="toggleNotifications()">🔔 <span id="notifyCount">0</span></button><button class="btn" onclick="openCart()">🛒 <span id="cartCount">0</span></button></div></div></header>
+<main><section class="hero"><div><span class="eyebrow" data-i18n="eyebrow">GLOBAL PET MARKETPLACE</span><h1 data-i18n="heroTitle">Everything your pet deserves.</h1><p data-i18n="heroText">Discover trusted products from PetCare and independent sellers, with a modern shopping experience built for customers everywhere.</p><div class="heroBtns"><button class="btn" onclick="document.querySelector('#products').scrollIntoView({behavior:'smooth'})" data-i18n="shop">Explore products</button><button class="btn light" onclick="openAuth('vendor')" data-i18n="sell">Become a seller</button></div><div id="accountMini" class="account hidden"></div></div><div class="heroArt">🐶 🐱</div></section>
+<section class="section" id="products"><div class="sectionHead"><div><h2 data-i18n="productsTitle">Featured products</h2><div class="muted" data-i18n="productsSub">Approved products from our marketplace.</div></div></div><div id="productGrid" class="grid"><p class="muted">Loading...</p></div></section>
+<section class="features" id="about"><div class="featureGrid"><div class="feature"><b>🌍</b><h3 data-i18n="f1">Built for everyone</h3><p class="muted" data-i18n="f1t">Bilingual, responsive and ready for a global audience.</p></div><div class="feature"><b>🛡️</b><h3 data-i18n="f2">Trusted marketplace</h3><p class="muted" data-i18n="f2t">Seller products are reviewed before they appear publicly.</p></div><div class="feature"><b>💳</b><h3 data-i18n="f3">Flexible payment</h3><p class="muted" data-i18n="f3t">Pay online when enabled or transfer cash and submit your reference.</p></div></div></section>
+<section class="section" id="contact"><div class="sectionHead"><div><h2 data-i18n="contactTitle">Contact us</h2><div class="muted">We save every message in the admin dashboard.</div></div></div><div class="modal" style="margin:auto"><div class="field"><label>Name</label><input id="cname"></div><div class="field"><label>Email</label><input id="cemail" type="email"></div><div class="field"><label>Message</label><textarea id="ctext"></textarea></div><button class="btn" onclick="sendContact()" data-i18n="send">Send message</button><div id="contactNotice" class="notice"></div></div></section></main><footer class="footer">© 2026 PetCare — Global Pet Marketplace</footer>
 
-<header>
-    <div class="logo">PetCare 🐾</div>
-    <nav>
-        <a onclick="scrollToSection('products')">المنتجات</a>
-        <a onclick="scrollToSection('contact')">تواصل معنا</a>
-        <a href="/admin.html">لوحة التحكم</a>
-        <button class="cart-btn" onclick="openCart()">🛒 السلة
-            <span class="cart-badge" id="cartBadge" style="display:none">0</span>
-        </button>
-    </nav>
-</header>
-
-<main>
-    <section class="hero">
-        <div>
-            <h1>كل ما يحتاجه حيوانك الأليف ❤️</h1>
-            <p>منتجات مختارة بعناية للحيوانات الأليفة، من الطعام والألعاب إلى أدوات العناية.</p>
-            <button class="btn" onclick="scrollToSection('products')">اكتشف المنتجات</button>
-        </div>
-        <div class="hero-card">🐶 🐱</div>
-    </section>
-
-    <section id="products">
-        <div class="title">
-            <h2>منتجاتنا</h2>
-            <p>اختر ما يناسب صديقك الأليف — البيانات محدّثة مباشرة من المخزون.</p>
-        </div>
-        <div class="products" id="productGrid">
-            <p style="text-align:center;grid-column:1/-1;color:#667085">جاري تحميل المنتجات...</p>
-        </div>
-    </section>
-
-    <section class="features">
-        <div class="feature"><div>🚚</div><h3>شحن سريع</h3><p>توصيل سريع للطلبات.</p></div>
-        <div class="feature"><div>🔒</div><h3>دفع آمن</h3><p>نحافظ على أمان بياناتك.</p></div>
-        <div class="feature"><div>⭐</div><h3>جودة عالية</h3><p>منتجات مختارة بعناية.</p></div>
-    </section>
-
-    <section id="contact">
-        <div class="title"><h2>تواصل معنا</h2></div>
-        <div class="contact">
-            <form id="contactForm">
-                <label>الاسم</label>
-                <input id="cname" required placeholder="اكتب اسمك">
-                <label>البريد الإلكتروني</label>
-                <input id="cemail" type="email" required placeholder="example@email.com">
-                <label>رسالتك</label>
-                <textarea id="ctext" required placeholder="اكتب رسالتك هنا..."></textarea>
-                <button class="btn" type="submit">إرسال الرسالة</button>
-                <div id="contactNotice" class="notice"></div>
-            </form>
-        </div>
-    </section>
-</main>
-
-<footer>© 2026 PetCare — جميع الحقوق محفوظة</footer>
-
-<!-- Cart Drawer -->
-<div class="overlay" id="overlay" onclick="closeCart()"></div>
-<aside class="drawer" id="drawer">
-    <div class="drawer-head">
-        <h3>السلة</h3>
-        <button onclick="closeCart()">✕</button>
-    </div>
-    <div class="drawer-body" id="cartItems"><p>السلة فارغة</p></div>
-    <div class="drawer-foot">
-        <div class="total"><span>الإجمالي</span><span id="cartTotal">$0</span></div>
-        <button class="btn" style="width:100%" id="checkoutBtn" onclick="openCheckout()" disabled>إتمام الطلب</button>
-    </div>
-</aside>
-
-<!-- Checkout Modal -->
-<div class="modal-bg" id="checkoutModal">
-    <div class="modal">
-        <button class="modal-close" onclick="closeCheckout()">✕</button>
-        <h3>إتمام الطلب</h3>
-        <form id="checkoutForm">
-            <label>الاسم الكامل</label>
-            <input id="orderName" required placeholder="اسمك الكامل">
-            <label>البريد الإلكتروني</label>
-            <input id="orderEmail" type="email" required placeholder="example@email.com">
-            <label>رقم الهاتف</label>
-            <input id="orderPhone" type="tel" required placeholder="01xxxxxxxxx">
-            <button class="btn" style="width:100%" type="submit" id="checkoutSubmitBtn">تأكيد الطلب والدفع</button>
-            <div id="checkoutNotice" class="notice"></div>
-        </form>
-    </div>
-</div>
-
+<div id="notifyPanel" class="noticePanel hidden"><div style="display:flex;justify-content:space-between;align-items:center"><b>Notifications</b><button class="btn light" onclick="markAllRead()">Mark all read</button></div><div id="notificationList"></div></div><div id="authBg" class="modalBg"><div class="modal"><button class="close" onclick="closeAuth()">×</button><h2 id="authTitle">Welcome back</h2><p class="muted">Use your email and password.</p><div class="tabs"><button id="tabLogin" class="active" onclick="setAuthMode('login')">Sign in</button><button id="tabRegister" onclick="setAuthMode('register')">Create account</button></div><div id="roleRow" class="field hidden"><label>Account type</label><select id="role"><option value="customer">Customer</option><option value="vendor">Seller / Company</option></select></div><div class="field"><label>Name</label><input id="authName" autocomplete="name"></div><div class="field"><label>Email</label><input id="authEmail" type="email" autocomplete="email"></div><div class="field"><label>Password</label><input id="authPassword" type="password" autocomplete="current-password"></div><div id="phoneRow" class="field hidden"><label>Phone</label><input id="authPhone"></div><button id="authSubmit" class="btn" style="width:100%" onclick="submitAuth()">Sign in</button><div id="authNotice" class="notice"></div></div></div>
+<div id="accountBg" class="modalBg"><div class="modal"><button class="close" onclick="document.getElementById('accountBg').classList.remove('open')">×</button><h2>My account</h2><div id="accountContent"></div></div></div>
+<div id="cartBg" class="modalBg"><div class="modal"><button class="close" onclick="closeCart()">×</button><h2>Shopping cart</h2><div id="cartItems"></div><div style="display:flex;justify-content:space-between;font-weight:900;margin:16px 0"><span>Total</span><span id="cartTotal">0 EGP</span></div><button id="checkoutBtn" class="btn" style="width:100%" onclick="checkout()">Checkout</button><div id="checkoutArea"></div></div></div>
 <script>
-let products = [];
-let cart = []; // { id, quantity }
+const $=id=>document.getElementById(id);let products=[],cart=JSON.parse(localStorage.getItem('petcare_cart')||'[]'),authMode='login',authToken=localStorage.getItem('petcare_token')||'',user=JSON.parse(localStorage.getItem('petcare_user')||'null'),lang=localStorage.getItem('petcare_lang')||'en';
+const T={en:{products:'Products',about:'About',contact:'Contact',login:'Sign in',eyebrow:'GLOBAL PET MARKETPLACE',heroTitle:'Everything your pet deserves.',heroText:'Discover trusted products from PetCare and independent sellers, with a modern shopping experience built for customers everywhere.',shop:'Explore products',sell:'Become a seller',productsTitle:'Featured products',productsSub:'Approved products from our marketplace.',f1:'Built for everyone',f1t:'Bilingual, responsive and ready for a global audience.',f2:'Trusted marketplace',f2t:'Seller products are reviewed before they appear publicly.',f3:'Flexible payment',f3t:'Pay online when enabled or transfer cash and submit your reference.',contactTitle:'Contact us',send:'Send message'},ar:{products:'المنتجات',about:'عن الموقع',contact:'تواصل معنا',login:'تسجيل الدخول',eyebrow:'سوق عالمي لمستلزمات الحيوانات',heroTitle:'كل ما يستحقه حيوانك الأليف.',heroText:'اكتشف منتجات موثوقة من PetCare والبائعين المستقلين بتجربة شراء حديثة مناسبة للعملاء في كل مكان.',shop:'استكشف المنتجات',sell:'كن بائعًا',productsTitle:'منتجات مميزة',productsSub:'منتجات تمت الموافقة عليها من سوقنا.',f1:'مصمم للجميع',f1t:'واجهة ثنائية اللغة ومتجاوبة وجاهزة لجمهور عالمي.',f2:'سوق موثوق',f2t:'نراجع منتجات البائعين قبل ظهورها للعامة.',f3:'دفع مرن',f3t:'ادفع إلكترونيًا عند تفعيله أو حوّل الكاش وأرسل مرجع العملية.',contactTitle:'تواصل معنا',send:'إرسال الرسالة'}};
+function applyLang(){document.documentElement.lang=lang;document.documentElement.dir=lang==='ar'?'rtl':'ltr';document.querySelectorAll('[data-i18n]').forEach(e=>e.textContent=T[lang][e.dataset.i18n]||e.textContent);$('lang').value=lang;localStorage.setItem('petcare_lang',lang)}$('lang').onchange=e=>{lang=e.target.value;applyLang()};
+async function api(url,opt={}){opt.headers={...(opt.headers||{}),...(authToken?{Authorization:'Bearer '+authToken}:{})};const r=await fetch(url,opt);let d={};try{d=await r.json()}catch{}if(!r.ok)throw new Error(d.error||'Request failed');return d}
+function saveCart(){localStorage.setItem('petcare_cart',JSON.stringify(cart));renderCartBadge()};function renderCartBadge(){$('cartCount').textContent=cart.reduce((s,x)=>s+x.quantity,0)}
+async function loadProducts(){try{products=await api('/api/products');$('productGrid').innerHTML=products.map(p=>`<article class="product"><div class="productIcon">${esc(p.emoji)}</div><h3>${esc(lang==='ar'?(p.nameAr||p.name):p.name)}</h3><div class="vendor">${esc(p.vendorName||'PetCare')}</div><div class="price">${p.price.toLocaleString()} EGP</div><div class="stock">${p.stock?'In stock: '+p.stock:'Out of stock'}</div><button class="btn" ${p.stock?'':'disabled'} onclick="add(${p.id})">Add to cart</button></article>`).join('')||'<p class="muted">No products yet.</p>'}catch(e){$('productGrid').innerHTML='<p class="muted">Unable to load products.</p>'}}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function add(id){const p=products.find(x=>x.id===id),x=cart.find(x=>x.id===id);if(!p)return;if((x?.quantity||0)+1>p.stock)return alert('Stock limit reached');x?x.quantity++:cart.push({id,quantity:1});saveCart();openCart()}
+function renderCart(){const box=$('cartItems');if(!cart.length){box.innerHTML='<p class="muted">Your cart is empty.</p>';$('cartTotal').textContent='0 EGP';$('checkoutBtn').disabled=true;return}$('checkoutBtn').disabled=false;let total=0;box.innerHTML=cart.map(x=>{const p=products.find(p=>p.id===x.id);if(!p)return '';total+=p.price*x.quantity;return `<div class="order"><b>${esc(p.name)}</b><div style="display:flex;justify-content:space-between;margin-top:7px"><span>${p.price} EGP × ${x.quantity}</span><span><button class="btn light" onclick="qty(${p.id},-1)">−</button> <button class="btn light" onclick="qty(${p.id},1)">+</button></span></div></div>`}).join('');$('cartTotal').textContent=total.toLocaleString()+' EGP'}function qty(id,d){const x=cart.find(x=>x.id===id),p=products.find(p=>p.id===id);if(!x)return;x.quantity+=d;if(x.quantity<1)cart=cart.filter(a=>a.id!==id);if(p&&x&&x.quantity>p.stock)x.quantity=p.stock;saveCart();renderCart()}
+function openCart(){renderCart();$('cartBg').classList.add('open')}function closeCart(){$('cartBg').classList.remove('open')}
+function openAuth(mode){if(mode==='vendor'){setAuthMode('register');$('role').value='vendor'}else setAuthMode('login');$('authBg').classList.add('open')};function closeAuth(){$('authBg').classList.remove('open')}
+function setAuthMode(m){authMode=m;$('tabLogin').classList.toggle('active',m==='login');$('tabRegister').classList.toggle('active',m==='register');$('roleRow').classList.toggle('hidden',m==='login');$('phoneRow').classList.toggle('hidden',m==='login');$('authName').parentElement.classList.toggle('hidden',m==='login');$('authSubmit').textContent=m==='login'?'Sign in':'Create account'}
+async function submitAuth(){const n=$('authName').value,e=$('authEmail').value,p=$('authPassword').value;try{const d=await api('/api/auth/'+(authMode==='login'?'login':'register'),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:n,email:e,password:p,phone:$('authPhone').value,role:$('role').value})});authToken=d.token;user=d.user;localStorage.setItem('petcare_token',authToken);localStorage.setItem('petcare_user',JSON.stringify(user));closeAuth();refreshUser();if(user.role==='admin')location.href='/admin.html';else if(user.role==='vendor')location.href='/vendor.html';else openAccount()}catch(e){show('authNotice',e.message,true)}}
+function refreshUser(){const logged=!!user; $('loginBtn').classList.toggle('hidden',logged);$('accountBtn').classList.toggle('hidden',!logged);$('logoutBtn').classList.toggle('hidden',!logged);$('notifyBtn').classList.toggle('hidden',!logged||user.role!=='customer');if(logged){$('accountMini').classList.remove('hidden');$('accountMini').innerHTML=`<b>Welcome, ${esc(user.name)}</b><div class="muted">${esc(user.email)}</div>`;if(user.role==='customer')loadNotifications()}}
+async function logout(){try{await api('/api/auth/logout',{method:'POST'})}catch{}authToken='';user=null;localStorage.removeItem('petcare_token');localStorage.removeItem('petcare_user');$('notifyPanel').classList.add('hidden');refreshUser()}
+async function loadNotifications(showBrowser=false){if(!user||user.role!=='customer')return;try{const d=await api('/api/notifications');$('notifyCount').textContent=d.unreadCount;const list=$('notificationList');list.innerHTML=d.notifications.length?d.notifications.map(n=>`<div class="notificationItem ${n.read?'':'unread'}" onclick="readNotification(${n.id})"><b>${esc(lang==='ar'?n.title:n.titleEn)}</b><div>${esc(lang==='ar'?n.message:n.messageEn)}</div><small class="muted">${new Date(n.createdAt).toLocaleString()}</small></div>`).join(''):'<p class="muted" style="padding:10px">No notifications yet.</p>';if(showBrowser&&d.unreadCount&&'Notification' in window&&Notification.permission==='granted'){new Notification(lang==='ar'?'منتج جديد متاح':'New product available',{body:lang==='ar'?'تمت إضافة منتج جديد إلى المتجر.':'A new product has been added to the store.'})}}catch(e){}}
+async function readNotification(id){try{await api('/api/notifications/'+id+'/read',{method:'PATCH'});loadNotifications()}catch(e){}}
+async function markAllRead(){try{await api('/api/notifications/read-all',{method:'POST'});loadNotifications()}catch(e){}}
+async function toggleNotifications(){const panel=$('notifyPanel');panel.classList.toggle('hidden');if(!panel.classList.contains('hidden')){if('Notification' in window&&Notification.permission==='default')try{await Notification.requestPermission()}catch(e){}loadNotifications()}}
+setInterval(()=>{if(user&&user.role==='customer')loadNotifications(true)},30000);
 
-function escapeHtml(str) {
-    return String(str).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-}
-
-function scrollToSection(id) {
-    document.getElementById(id).scrollIntoView({ behavior: "smooth" });
-}
-
-async function loadProducts() {
-    try {
-        const res = await fetch("/api/products");
-        products = await res.json();
-        renderProducts();
-    } catch {
-        document.getElementById("productGrid").innerHTML = "<p style='grid-column:1/-1;text-align:center'>تعذر تحميل المنتجات، حاول لاحقًا.</p>";
-    }
-}
-
-function renderProducts() {
-    document.getElementById("productGrid").innerHTML = products.map(p => `
-        <div class="product">
-            <div class="emoji">${escapeHtml(p.emoji)}</div>
-            <h3>${escapeHtml(p.name)}</h3>
-            <div class="price">$${p.price}</div>
-            <div class="stock ${p.stock === 0 ? 'low' : ''}">${p.stock === 0 ? 'نفدت الكمية' : 'المتوفر: ' + p.stock}</div>
-            <button class="btn" ${p.stock === 0 ? "disabled" : ""} onclick="addToCart(${p.id})">أضف للسلة</button>
-        </div>`).join("");
-}
-
-function addToCart(id) {
-    const product = products.find(p => p.id === id);
-    const inCart = cart.find(x => x.id === id);
-    const currentQty = inCart ? inCart.quantity : 0;
-    if (currentQty + 1 > product.stock) return showNotice(null, "الكمية المطلوبة تتجاوز المتوفر بالمخزون", true);
-    if (inCart) inCart.quantity++; else cart.push({ id, quantity: 1 });
-    renderCart();
-    openCart();
-}
-
-function changeQty(id, delta) {
-    const item = cart.find(x => x.id === id);
-    const product = products.find(p => p.id === id);
-    if (!item) return;
-    const next = item.quantity + delta;
-    if (next < 1) { cart = cart.filter(x => x.id !== id); }
-    else if (next > product.stock) { return; }
-    else { item.quantity = next; }
-    renderCart();
-}
-
-function removeFromCart(id) {
-    cart = cart.filter(x => x.id !== id);
-    renderCart();
-}
-
-function renderCart() {
-    const badge = document.getElementById("cartBadge");
-    const totalCount = cart.reduce((s, x) => s + x.quantity, 0);
-    badge.style.display = totalCount ? "flex" : "none";
-    badge.textContent = totalCount;
-
-    const container = document.getElementById("cartItems");
-    if (!cart.length) {
-        container.innerHTML = "<p>السلة فارغة</p>";
-        document.getElementById("cartTotal").textContent = "$0";
-        document.getElementById("checkoutBtn").disabled = true;
-        return;
-    }
-
-    let total = 0;
-    container.innerHTML = cart.map(x => {
-        const p = products.find(y => y.id === x.id);
-        const lineTotal = p.price * x.quantity;
-        total += lineTotal;
-        return `
-        <div class="cart-item">
-            <div class="info">
-                <div>${escapeHtml(p.name)}</div>
-                <div style="color:#667085;font-size:14px">$${p.price} × ${x.quantity} = $${lineTotal}</div>
-                <button class="remove-btn" onclick="removeFromCart(${p.id})">إزالة</button>
-            </div>
-            <div class="qty-controls">
-                <button onclick="changeQty(${p.id}, 1)">+</button>
-                <span>${x.quantity}</span>
-                <button onclick="changeQty(${p.id}, -1)">-</button>
-            </div>
-        </div>`;
-    }).join("");
-    document.getElementById("cartTotal").textContent = "$" + total;
-    document.getElementById("checkoutBtn").disabled = false;
-}
-
-function openCart() { document.getElementById("drawer").classList.add("open"); document.getElementById("overlay").classList.add("open"); }
-function closeCart() { document.getElementById("drawer").classList.remove("open"); document.getElementById("overlay").classList.remove("open"); }
-
-function openCheckout() {
-    if (!cart.length) return;
-    document.getElementById("checkoutModal").classList.add("open");
-}
-function closeCheckout() { document.getElementById("checkoutModal").classList.remove("open"); }
-
-function showNotice(elId, text, isError) {
-    const el = elId ? document.getElementById(elId) : null;
-    if (!el) { alert(text); return; }
-    el.textContent = text;
-    el.className = "notice" + (isError ? " error" : "");
-    el.style.display = "block";
-    setTimeout(() => { el.style.display = "none"; }, 4000);
-}
-
-document.getElementById("checkoutForm").addEventListener("submit", async e => {
-    e.preventDefault();
-    const name = document.getElementById("orderName").value.trim();
-    const email = document.getElementById("orderEmail").value.trim();
-    const phone = document.getElementById("orderPhone").value.trim();
-    const submitBtn = document.getElementById("checkoutSubmitBtn");
-    submitBtn.disabled = true;
-    submitBtn.textContent = "جاري التجهيز...";
-    try {
-        const res = await fetch("/api/orders", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ customer: { name, email, phone }, items: cart })
-        });
-        const data = await res.json();
-        if (!res.ok) { showNotice("checkoutNotice", data.error || "حدث خطأ", true); return; }
-
-        if (data.status === "قيد التجهيز") {
-            // Payments not configured on this deployment — order accepted without online payment.
-            cart = [];
-            renderCart();
-            await loadProducts();
-            closeCheckout();
-            closeCart();
-            e.target.reset();
-            alert("تم إنشاء الطلب رقم #" + data.id + " بنجاح 🎉");
-            return;
-        }
-
-        const payRes = await fetch(`/api/orders/${data.id}/pay`, { method: "POST" });
-        const payData = await payRes.json();
-        if (!payRes.ok) { showNotice("checkoutNotice", payData.error || "تعذر بدء الدفع", true); return; }
-
-        window.location.href = payData.iframeUrl; // redirect to Paymob hosted checkout
-    } catch {
-        showNotice("checkoutNotice", "تعذر الاتصال بالخادم", true);
-    } finally {
-        submitBtn.disabled = false;
-        submitBtn.textContent = "تأكيد الطلب والدفع";
-    }
-});
-
-document.getElementById("contactForm").addEventListener("submit", async e => {
-    e.preventDefault();
-    const name = document.getElementById("cname").value.trim();
-    const email = document.getElementById("cemail").value.trim();
-    const text = document.getElementById("ctext").value.trim();
-    try {
-        const res = await fetch("/api/contact", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name, email, text })
-        });
-        const data = await res.json();
-        if (!res.ok) return showNotice("contactNotice", data.error || "حدث خطأ", true);
-        showNotice("contactNotice", "تم إرسال رسالتك بنجاح! 🎉");
-        e.target.reset();
-    } catch {
-        showNotice("contactNotice", "تعذر الاتصال بالخادم", true);
-    }
-});
-
-loadProducts();
-</script>
-</body>
-</html>
+async function openAccount(){if(!user)return openAuth();const orders=await api('/api/orders/mine');$('accountContent').innerHTML=`<p><b>${esc(user.name)}</b><br>${esc(user.email)}</p><h3>Your orders</h3><div class="orders">${orders.length?orders.map(o=>`<div class="order"><b>#${o.id}</b> <span class="pill">${esc(o.status)}</span><div>${o.total.toLocaleString()} EGP · ${o.paymentMethod==='cash'?'Cash transfer':'Online payment'}</div>${o.paymentMethod==='cash'&&o.status==='بانتظار تحويل الكاش'?`<div class="cashBox"><b>Payment instructions</b>${(o.vendorBreakdown||[]).map(v=>`<div style="padding:10px 0;border-bottom:1px solid #bbf7d0"><b>${esc(v.vendorName)}</b><div>${v.subtotal.toLocaleString()} EGP · ${esc(v.paymentMethod==='bank'?'Bank transfer':'Wallet transfer')}</div><div>${esc(v.paymentInstructions||o.cashPhone||'Payment details not configured by seller')}</div></div>`).join('')}<p>After transfer, enter the transaction/reference number below.</p><input id="ref${o.id}" placeholder="Transfer reference"><button class="btn" onclick="submitProof(${o.id})">Submit reference</button></div>`:''}</div>`).join(''):'<p class="muted">No orders yet.</p>'}</div>`;$('accountBg').classList.add('open')}
+async function submitProof(id){const ref=$('ref'+id).value;try{await api('/api/orders/'+id+'/cash-proof',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({reference:ref})});alert('Submitted for review.');openAccount()}catch(e){alert(e.message)}}
+async function checkout(){if(!user){closeCart();return openAuth()}if(!cart.length)return;const phone=prompt('Enter your phone number');if(!phone)return;const method=confirm('Press OK for online payment (if enabled), or Cancel for cash transfer.')?'paymob':'cash';try{const o=await api('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({customer:{name:user.name,email:user.email,phone},items:cart,paymentMethod:method})});cart=[];saveCart();if(method==='paymob'&&o.status==='بانتظار الدفع'){const p=await api('/api/orders/'+o.id+'/pay',{method:'POST'});location.href=p.iframeUrl}else{closeCart();await openAccount()}}catch(e){alert(e.message)}}
+async function sendContact(){try{await api('/api/contact',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:$('cname').value,email:$('cemail').value,text:$('ctext').value})});show('contactNotice','Message sent successfully.');$('ctext').value=''}catch(e){show('contactNotice',e.message,true)}}function show(id,text,err=false){$(id).textContent=text;$(id).className='notice show'+(err?' err':'')}
+applyLang();renderCartBadge();refreshUser();loadProducts();
+</script></body></html>
